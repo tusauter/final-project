@@ -72,17 +72,17 @@ class User < ApplicationRecord
   end
 
   def current_apartment(the_year)
-    the_query = "SELECT a.apartment_id
+    the_query = "SELECT a.id
                  FROM users u
                       LEFT JOIN current_locations cl ON u.id = cl.user_id
-                      LEFT JOIN apartments a ON cl.apartment_id = a.apartment_id
-                 WHERE u.user_id = #{self.id} AND
+                      LEFT JOIN apartments a ON cl.apartment_id = a.id
+                 WHERE u.id = #{self.id} AND
                        year = #{the_year};"
     the_apartment = ActiveRecord::Base.connection.execute(the_query)
     if the_apartment.count == 0
       return nil
     else
-      return Apartment.where({ :apartment_id => the_apartment[0]["apartment_id"] }).first
+      return Apartment.where({ :id => the_apartment[0]["id"] }).first
     end
   end
 

@@ -43,7 +43,7 @@ class ApartmentsController < ApplicationController
       user_location = CurrentLocation.new({
                                               :user_id => session[:user_id],
                                               :year => 2019,
-                                              :apartment_id => the_apartment.apartment_id
+                                              :apartment_id => the_apartment.id
                                           })
       if user_location.save
         add_flash :success, "Thanks for adding some info on your apartment!"
