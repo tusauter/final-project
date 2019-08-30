@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MbaApartment</title>
+  <%= csrf_meta_tags %>
+
+  <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cookie">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/stylesheets/Pretty-Header.css">
+  
+  <!-- START BOOTSTRAP -->
+  <!-- Connect Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- Connect Bootstrap JavaScript -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- Make it responsive to small screens -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- END BOOTSTRAP -->
+  
+  <% if content_for?(:style_sheets) %>
+    <%= yield(:style_sheets) %>
+  <% end %>
+</head>
+
+<body>
+<% if content_for?(:nav) %>
+  <%= yield(:nav) %>
+<% else %>
+  <nav class="navbar navbar-light navbar-expand-md custom-header">
+    <div class="container-fluid">
+      <div><a class="navbar-brand" href="#">Company<span>logo </span> </a><button data-toggle="collapse" class="navbar-toggler" data-target="#navbar-collapse"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button></div>
+      <div
+          class="collapse navbar-collapse" id="navbar-collapse">
+        <ul class="nav navbar-nav links">
+          <li class="nav-item" role="presentation"><a class="nav-link" href="/">Home </a></li>
+          <li class="nav-item" role="presentation"><a class="nav-link" href="/cities">Cities </a></li>
+          <li class="nav-item" role="presentation"><a class="nav-link" href="/search_by_address">Search By Address </a></li>
+        </ul>
+        <ul class="nav navbar-nav ml-auto">
+          <% if session[:user_id] != nil %>
+            <% the_user = User.where({ :id => session[:user_id] }) %>
+            <% if the_user.length > 0 %>
+              <% the_user = the_user[0] %>
+              <span style="color: white;">Hi <%= the_user.first_name %>!</span>
+              <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"> <img class="dropdown-image" src="<%= the_user.gravatar_link %>"></a>
+                <div class="dropdown-menu dropdown-menu-right" role="menu">
+                  <a class="dropdown-item" role="presentation" href="/users/<%= the_user.id %>">My Apartment Search </a>
+                  <a class="dropdown-item" role="presentation" href="#">Payments </a>
+                  <a class="dropdown-item" role="presentation" href="/logout">Logout </a></div>
+              </li>
+            <% else %>
+              <li class="nav-item nav-link">
+                <a href="/sign_up" style="color: white;">Sign Up</a>
+              </li>
+              <li class="nav-item nav-link">
+                <a href="/sign_in" style="color: white;">Sign In</a>
+              </li>
+            <% end %>
+          <% else %>
+            <li class="nav-item nav-link">
+              <a href="/sign_up" style="color: white;">Sign Up</a>
+            </li>
+            <li class="nav-item nav-link">
+              <a href="/sign_in" style="color: white;">Sign In</a>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </nav>
+<% end %>
+
+<div class="container">
+  <% flash.each do |key, value| %>
+    <% value.each do |the_message| %>
+      <div class="alert alert-<%= key %>  alert-dismissible fade show">
+        <%= the_message.html_safe %>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<p><%= session.keys.to_s %></p>
+<p><%= session[:user_id] == nil ? "not signed in" : session[:user_id] %></p>
+
+<%= yield %>
+
+<!--<script src="/javascript/jquery.min.js"></script>-->
+<!--<script src="/javascript/bootstrap.min.js"></script>-->
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.18/af-2.3.3/b-1.5.6/cr-1.5.0/r-2.2.2/sc-2.0.0/datatables.min.js"></script>
+
+
+</body>
+
+<% if content_for?(:scripts) %>
+  <%= yield(:scripts) %>
+<% end %>
+
+</html>

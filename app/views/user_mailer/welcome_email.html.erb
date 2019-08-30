@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+  </head>
+  <body>
+    <h1>Welcome to the apartment swap, <%= @user.first_name %></h1>
+    <p>
+      You have successfully signed up with the email address: <%= @user.email %>.<br/>
+    </p>
+    <p>
+      Please activate your account <a href="http://bronze-ammonia-3000.codio.io/users/<%= @user.id %>/activate=<%= @user.activation_token %>">here</a>.
+    </p>
+
+    <p>Thanks for joining and have a great day!</p>
+  </body>
+</html>

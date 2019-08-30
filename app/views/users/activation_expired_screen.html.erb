@@ -1,0 +1,5 @@
+<p>Uh oh <%= @the_user.first %>, it looks like your activation token has expired.
+  Click
+  <a href="/regenerate_activation/<%= @the_user.user_id %>/<%= @the_user.activation_token %>">here</a>
+  to have a new link sent to your email.
+</p>
