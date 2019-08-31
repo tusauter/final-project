@@ -1,7 +1,20 @@
+<div class="container">
+  <% if @is_signed_in == true && User.where({ :id => session[:user_id] }).first.account_activated == false %>
+    <div class="alert alert-warning  alert-dismissible fade show">
+      You must activate your account. Please check your email for an activation link.
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  <% end %>
+</div>
+
 <h1>Name:</h1>
 <p><%= @user.first_name.strip + " " + @user.last_name.strip %></p>
 <h1>Email Address:</h1>
-<p><%= @user.email %></p>
+<p><%= User.where({ :id => session[:user_id] }).first.account_activated == false ? 
+    "Activate your account to see this user's email address." : 
+    @user.email %></p>
 
 <% if @is_signed_in == false %> %>
   <!-- not signed in -->
@@ -14,6 +27,10 @@
     </div>
   </div>
   <h3>If you want to sign in  you can click <a href="/sign_in">here</a>.</h3>
+<% elsif User.where({ :id => session[:user_id] }).first.account_activated == false %>
+  <h2>Current city: <%= @user.has_apartment(2019) ? @user.current_apartment(2019).city : "not provided" %></h2>
+  <br>
+  <h4>Your account must be activated in order to view more specifics. Please check your email for the activation email.</h4>
 <% elsif session[:user_id] != @user.id %>
   <!-- signed in and not the user-->
   <h2>Current city: <%= @user.has_apartment(2019) ? @user.current_apartment(2019).city : "not provided" %></h2>
