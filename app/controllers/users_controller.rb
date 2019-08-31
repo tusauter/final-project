@@ -235,7 +235,7 @@ class UsersController < ApplicationController
 
   def display_json(the_user)
     for_display = {
-        :id => the_user[:id] == nil ? the_user["user_id"] : the_user[:id],
+        :id => the_user[:id] == nil ? the_user["id"] : the_user[:id],
         :email  => the_user[:email] == nil ? the_user["email"] : the_user[:email],
         :name => the_user[:name] == nil ? the_user["first_name"].strip + " " + the_user["last_name"].strip : the_user[:name],
         :gender => the_user[:gender] == nil ? the_user["gender"] : the_user[:gender]

@@ -35,6 +35,8 @@ Rails.application.routes.draw do
   post "/add_apartment", to: "apartments#create"
 
   # READ
+  get "/apartments", to: "apartments#index"
+  get "/apartments/:apartment_id", to: "apartments#show"
 
   # UPDATE
 

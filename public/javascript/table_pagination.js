@@ -1,4 +1,4 @@
 $(document).ready(function () {
-    $('#usersTable').DataTable();
+    $('#theTable').DataTable();
     $('.dataTables_length').addClass('bs-select');
 });

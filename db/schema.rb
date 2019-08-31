@@ -73,13 +73,14 @@ ActiveRecord::Schema.define(version: 20190830192701) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "soft_deleted_at"
-    t.index ["address", "apartment_number", "city", "state"], name: "apartments_address_apartment_number_city_state_key", unique: true
+    t.index ["address", "apartment_number", "city", "state"], name: "apartments_address_apartment_number_city_state_key"
   end
 
   create_table "current_locations", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "year", null: false
     t.integer "apartment_id"
+    t.float "price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "soft_deleted_at"

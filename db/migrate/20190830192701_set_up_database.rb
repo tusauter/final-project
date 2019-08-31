@@ -25,6 +25,7 @@ class SetUpDatabase < ActiveRecord::Migration[5.1]
       t.integer "user_id", null: false
       t.integer "year", null: false
       t.integer "apartment_id"
+      t.float "price"
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
       t.datetime "soft_deleted_at"
@@ -67,7 +68,7 @@ class SetUpDatabase < ActiveRecord::Migration[5.1]
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
       t.datetime "soft_deleted_at"
-      t.index ["address", "apartment_number", "city", "state"], name: "apartments_address_apartment_number_city_state_key", unique: true
+      t.index ["address", "apartment_number", "city", "state"], name: "apartments_address_apartment_number_city_state_key" #, unique: true
     end
 
     # now create a rooms table

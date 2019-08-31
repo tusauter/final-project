@@ -2,7 +2,41 @@ require "json"
 require "open-uri"
 
 class ApartmentsController < ApplicationController
-
+  
+  def index
+    @is_signed_in = self.signed_in
+    @account_activated = false
+    if @is_signed_in
+      if User.where({ :id => session[:user_id] }).first.account_activated == true
+        @account_activated = true
+      end
+    end
+    
+    locations_this_year = CurrentLocation.where({ :year => 2019 }).pluck(:apartment_id)
+    @apartments = Apartment.where({ :id => locations_this_year })
+    
+    respond_to do |format|
+      format.json {
+        if @is_signed_in == false
+          render({ :plain => ({ :status => "not signed in" }).to_json })
+        else
+          json_apartments = @apartments.map {|x| display_json(x) }
+          render({ :plain => json_apartments.to_json })
+        end
+      }
+      format.html {
+        if @is_signed_in == false
+          add_flash :danger, "You must be signed in to view specifics on apartments in the system."
+        end
+        if @account_activated == false
+          add_flash :danger, "You need to activate your account to see contact information for specific apartments."
+        end
+        render({ :template => 'apartments/index' })
+      }
+    end
+    
+  end
+  
   def create
     is_signed_in = self.signed_in
     if is_signed_in == false
@@ -56,7 +90,32 @@ class ApartmentsController < ApplicationController
 
     add_flash :danger, "Uh oh, we couldn't save your apartment. Please try again."
     redirect_to("/users/#{session[:user_id]}")
-
   end
+  
+  def display_json(the_apartment)
+    for_display = {
+      :id => the_apartment[:id] == nil ? the_apartment["id"] : the_apartment[:id],
+      :address  => the_apartment[:address] == nil ? the_apartment["address"] : the_apartment[:address],
+      :city => the_apartment[:city] == nil ? the_apartment["city"] : the_apartment[:city],
+      :state => the_apartment[:state] == nil ? the_apartment["state"] : the_apartment[:state],
+      :country => the_apartment[:country] == nil ? the_apartment["country"] : the_apartment[:country],
+      :gps_coordinates => {
+        :longitude => the_apartment[:longitude] == nil ? the_apartment["longitude"] : the_apartment[:longitude],
+        :latitude => the_apartment[:latitude] == nil ? the_apartment["latitude"] : the_apartment[:latitude]
+        }
+    }
+    if session[:user_id] != nil && User.where({ :id => session[:user_id] }).first.account_activated == true
+      occupant_info = CurrentLocation.where({ :apartment_id => the_apartment.id, :year => 2019 })
+      if occupant_info.count > 0
+        the_occupant = User.where({ :id => occupant_info[0][:user_id] })
+        if the_occupant.count > 0
+          for_display[:contact_name] = the_occupant[0].first_name.strip + " " + the_occupant[0].last_name.strip
+          for_display[:contact_email] = the_occupant[0].email
+        end
+      end
+    end
+    return for_display
+  end
+
 
 end

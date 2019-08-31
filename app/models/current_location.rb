@@ -6,6 +6,7 @@
 #  user_id         :integer          not null
 #  year            :integer          not null
 #  apartment_id    :integer
+#  price           :float
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  soft_deleted_at :datetime

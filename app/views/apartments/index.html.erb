@@ -1,0 +1,50 @@
+<div class="container">
+  <table id="theTable" class="table table-striped table-bordered table-sm" cellspacing="0" style="max-width: 100%; margin: auto;">
+    <thead>
+      <tr>
+        <th class="th-sm">Address</th>
+        <th class="th-sm">City</th>
+        <th class="th-sm">Price Point</th>
+        <th class="th-sm">Contact Info</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @apartments.each do |apartment| %>
+        <% the_location_record = CurrentLocation.where({ :apartment_id => apartment.id, :year => 2019 }) %>
+        <% the_price = nil %>
+        <% if the_location_record.count > 0 %>
+          <% the_price = the_location_record[0].price %>
+          <% the_contacts = User.where({ :id => the_location_record[0].user_id }) %>
+          <% contact_email = nil %>
+          <% if the_contacts.count > 0 %>
+            the_contact = the_contacts[0]
+            contact_email = the_contact.email
+          <% end %>
+        <% end %>
+        <tr>
+          <td>
+            <% if @is_signed_in %>
+              <a href="/apartments/<%= "#{apartment[:id]}" %>"><%= apartment[:address] %></a>
+            <% else %>
+              *******
+            <% end %>
+          </td>
+          <td><%= apartment.city + ", " + apartment.state %></td>
+          <td><%= @account_activated ? (the_price == nil ? "" : "#{the_price}") : ""  %></td>
+          <td><%= (@account_activated && (contact_email != nil)) ? contact_email : "****@***.***" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+    <!--<tfoot>
+      <tr>
+        <th>Name</th>
+        <th>Email Address</th>
+        <th>Target Location</th>
+      </tr>
+    </tfoot>-->
+  </table>
+</div>
+
+<% content_for :scripts do %>
+  <script src="/javascript/table_pagination.js"></script>
+<% end %>
