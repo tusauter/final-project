@@ -7,6 +7,9 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 AdminUser.create(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
 
+require "json"
+require "open-uri"
+
 the_users = [{ :email => 'John.Miller@chicagobooth.edu',
   :first_name => 'John',
   :last_name =>'Miller',
@@ -109,4 +112,29 @@ the_users.each do |new_user|
   u.salt = BCrypt::Engine.generate_salt
   u.password_hash = BCrypt::Engine.hash_secret 'password', u.salt
   u.save
+end
+
+(1..5).each do |idx|
+  apartment = {
+    :address => "151 N Michigan Ave",
+    :apartment_number => idx * 20 + 4,
+    :city => "Chicago",
+    :state => "IL",
+    :country => "US",
+    :latitude => 41.8854653,
+    :longitude => -87.6262996,
+    :zip => "60601"
+    }
+  the_price = 1800 + (idx - 1) * 150
+  
+  a = Apartment.new(apartment)
+  a.save
+  
+  cl = CurrentLocation.new({
+    :year => 2019,
+    :apartment_id => a.id,
+    :user_id => idx,
+    :price => the_price
+    })
+  cl.save
 end

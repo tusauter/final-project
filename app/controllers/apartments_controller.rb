@@ -37,6 +37,57 @@ class ApartmentsController < ApplicationController
     
   end
   
+  def show
+    @is_signed_in = self.signed_in
+    @the_apartment = Apartment.where({ :id => params[:apartment_id] })
+    
+    if @the_apartment.count == 0
+      add_flash :warning, "Huh... we couldn't find this apartment. Maybe try again?"
+      redirect_to("/")
+      return
+    end
+    
+    @the_apartment = @the_apartment[0]
+    
+    the_location = CurrentLocation.where({ :apartment_id => @the_apartment.id, :year => 2019 })
+    
+    @the_price = nil
+    @the_owner = nil
+    if the_location.count > 0
+      @the_price = the_location[0].price
+      @the_owner = User.where({ :id => the_location[0].user_id }).first
+    end
+    
+    lat = @the_apartment.latitude
+    lng = @the_apartment.longitude
+    @static_map_link = "https://maps.googleapis.com/maps/api/staticmap?center=#{lat},#{lng}&zoom=14&size=800x150&key=#{ENV["GOOGLE_MAPS_KEY"]}&markers=#{lat},#{lng}&scale=2"
+    
+    respond_to do |format|
+      format.json {
+        if @is_signed_in
+          render({ :plain => self.to_json })
+        else
+          render({ :plain => ({ :status => "not signed in." }).to_json })
+        end
+        return
+      }
+      format.html {
+        if @is_signed_in == false
+          add_flash :danger, "You must be signed in to view specifics on apartments in the system."
+          redirect_to("/sign_in")
+          return
+        end
+        if User.where({ :id => session[:user_id] }).first.account_activated == false
+          add_flash :warning, "You must activate your account to view specifics on apartments in the system."
+          redirect_to("/")
+          return
+        end
+        render({ :template => "apartments/show" })
+      }
+    end
+    
+  end
+  
   def create
     is_signed_in = self.signed_in
     if is_signed_in == false

@@ -39,8 +39,8 @@
           class="collapse navbar-collapse" id="navbar-collapse">
         <ul class="nav navbar-nav links">
           <li class="nav-item" role="presentation"><a class="nav-link" href="/">Home </a></li>
-          <li class="nav-item" role="presentation"><a class="nav-link" href="/cities">Cities </a></li>
-          <li class="nav-item" role="presentation"><a class="nav-link" href="/search_by_address">Search By Address </a></li>
+          <li class="nav-item" role="presentation"><a class="nav-link" href="/apartments">Apartments </a></li>
+          <!--<li class="nav-item" role="presentation"><a class="nav-link" href="/search_by_address">Search By Address </a></li>-->
         </ul>
         <ul class="nav navbar-nav ml-auto">
           <% if session[:user_id] != nil %>
@@ -88,9 +88,6 @@
     <% end %>
   <% end %>
 </div>
-
-<p><%= session.keys.to_s %></p>
-<p><%= session[:user_id] == nil ? "not signed in" : session[:user_id] %></p>
 
 <%= yield %>
 

@@ -1,0 +1,24 @@
+<h1>Apartment in <%= @the_apartment.city + ", " + @the_apartment.state %></h1>
+<br>
+
+<div class="container" style="margin: auto;">
+  <h2>Check it out below!</h2>
+  <img src="<%= @static_map_link %>">
+  
+  <br>
+  
+  <% if @the_owner != nil %>
+    <% if @the_owner.id == session[:user_id] %>
+      <p>This is your apartment! You can edit it <a href="/users/<%= session[:user_id].to_s %>">here</a>.</p>
+    <% else %>
+      <% if @the_price != nil %>
+        <p> This apartment rents for $<%= @the_price.to_s %>. Contact <%= @the_owner.first_name + " " + @the_owner.last_name %> at <%= @the_owner.email %> for more info.</p>
+      <% else %>
+        <p>Contact <%= @the_owner.first_name + " " + @the_owner.last_name %> at <%= @the_owner.email %> for more info.</p>
+      <% end %>
+    <% end %>
+  <% end %>
+  <p><%= @the_apartment.address %></p>
+  <p><%= @the_apartment.city + ", " + @the_apartment.state + " " + @the_apartment.zip %></p>
+
+</div>

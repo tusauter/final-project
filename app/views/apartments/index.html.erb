@@ -17,8 +17,8 @@
           <% the_contacts = User.where({ :id => the_location_record[0].user_id }) %>
           <% contact_email = nil %>
           <% if the_contacts.count > 0 %>
-            the_contact = the_contacts[0]
-            contact_email = the_contact.email
+            <% the_contact = the_contacts[0] %>
+            <% contact_email = the_contact.email %>
           <% end %>
         <% end %>
         <tr>
