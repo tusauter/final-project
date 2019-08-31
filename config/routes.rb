@@ -39,6 +39,8 @@ Rails.application.routes.draw do
   get "/apartments/:apartment_id", to: "apartments#show"
 
   # UPDATE
+  post "/update_apartment", to: "apartments#update"
+  post "/inactivate_apartment", to: "apartments#take_off_market"
 
   # DESTROY
 

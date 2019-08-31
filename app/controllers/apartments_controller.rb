@@ -12,7 +12,8 @@ class ApartmentsController < ApplicationController
       end
     end
     
-    locations_this_year = CurrentLocation.where({ :year => 2019 }).pluck(:apartment_id)
+    users_with_sublettors = UserStatus.where({ :year => 2019, :found_sublettor => true }).pluck(:user_id)
+    locations_this_year = CurrentLocation.where({ :year => 2019 }).where.not({ :user_id => users_with_sublettors }).pluck(:apartment_id)
     @apartments = Apartment.where({ :id => locations_this_year })
     
     respond_to do |format|
@@ -40,6 +41,14 @@ class ApartmentsController < ApplicationController
   def show
     @is_signed_in = self.signed_in
     @the_apartment = Apartment.where({ :id => params[:apartment_id] })
+    
+    users_with_sublettors = UserStatus.where({ :year => 2019, :found_sublettor => true }).pluck(:user_id)
+    locations_this_year = CurrentLocation.where({ :year => 2019 }).where.not({ :user_id => users_with_sublettors }).pluck(:apartment_id)
+    if locations_this_year.include?(@the_apartment.id) == false
+      add_flash :warning, "This apartment is off the market."
+      redirect_to("/")
+      return
+    end
     
     if @the_apartment.count == 0
       add_flash :warning, "Huh... we couldn't find this apartment. Maybe try again?"
@@ -108,8 +117,14 @@ class ApartmentsController < ApplicationController
         params[:qs_address] + ", " + params[:qs_city] + " " + params[:qs_state] + "&key=" + ENV["GOOGLE_MAPS_KEY"]
     raw_maps_results = open(google_maps_api_url).read
     json_maps_results = JSON.parse(raw_maps_results)
+    if json_maps_results["results"].length == 0
+      add_flash :danger, "It looks like the address you added may be invalid. Why don't you try again?"
+      redirect_to("/users/#{session[:user_id]}")
+      return
+    end
+    json_maps_results = json_maps_results["results"][0]
 
-    the_country = json_maps_results["results"][0].fetch("address_components").select{|x| x["types"].include? "country"}[0].fetch("long_name")
+    the_country = json_maps_results.fetch("address_components").select{|x| x["types"].include? "country"}[0].fetch("long_name")
     # add new apartment
     the_apartment = Apartment.new({ :address => json_maps_results.fetch("formatted_address", params[:qs_address]),
                                     :apartment_number => params[:qs_apt_num],
@@ -128,7 +143,8 @@ class ApartmentsController < ApplicationController
       user_location = CurrentLocation.new({
                                               :user_id => session[:user_id],
                                               :year => 2019,
-                                              :apartment_id => the_apartment.id
+                                              :apartment_id => the_apartment.id,
+                                              :price => params[:qs_price]
                                           })
       if user_location.save
         add_flash :success, "Thanks for adding some info on your apartment!"
@@ -141,6 +157,102 @@ class ApartmentsController < ApplicationController
 
     add_flash :danger, "Uh oh, we couldn't save your apartment. Please try again."
     redirect_to("/users/#{session[:user_id]}")
+  end
+  
+  def update
+    is_signed_in = self.signed_in
+    if is_signed_in == false
+      add_flash :danger, "Uh oh, you need to be signed in!"
+      redirect_to("/")
+      return
+    end
+    
+    the_user = User.where({ :id => session[:user_id] }).first
+    the_apartments = CurrentLocation.where({ :user_id => the_user.id, :year => 2019 })
+    if the_apartments.count == 0
+      add_flash :danger, "Hmm... doesn't look like you have an apartment in the system."
+      redirect_to("/users/#{the_user.id}")
+      return
+    end
+    the_apartment = Apartment.where({ :id => the_apartments[0].apartment_id }).first
+
+    google_maps_api_url = "https://maps.googleapis.com/maps/api/geocode/json?address=" +
+        params[:qs_address] + ", " + params[:qs_city] + " " + params[:qs_state] + "&key=" + ENV["GOOGLE_MAPS_KEY"]
+    raw_maps_results = open(google_maps_api_url).read
+    json_maps_results = JSON.parse(raw_maps_results)
+    
+    if json_maps_results["results"].length == 0
+      add_flash :danger, "It looks like the address you added may be invalid. Why don't you try again?"
+      redirect_to("/users/#{session[:user_id]}")
+      return
+    end
+    json_maps_results = json_maps_results["results"][0]
+
+    the_country = json_maps_results.fetch("address_components").select{|x| x["types"].include? "country"}[0].fetch("long_name")
+    
+    the_apartment.address = json_maps_results.fetch("formatted_address", params[:qs_address])
+    the_apartment.apartment_number = params[:qs_apt_num]
+    the_apartment.city = params[:qs_city]
+    the_apartment.state = params[:qs_state]
+    the_apartment.zip = params[:qs_zip]
+    the_apartment.latitude = params[:qs_lat]
+    the_apartment.longitude = params[:qs_lng]
+    the_apartment.country = the_country
+    apartment_saved = the_apartment.save
+
+    if apartment_saved
+      # add new current location record
+      user_location = CurrentLocation.where({
+                                              :user_id => session[:user_id],
+                                              :year => 2019,
+                                              :apartment_id => the_apartment.id
+                                          }).first
+      user_location.price = params[:qs_price]
+      if user_location.save
+        add_flash :success, "Thanks for updating the info on your apartment!"
+        redirect_to("/users/#{session[:user_id]}")
+        return
+      else
+        add_flash :danger, "Uh oh... something went wrong. Please check your apartment info and update if necessary."
+        redirect_to("/users/#{session[:user_id]}")
+        return
+      end
+    end
+
+    add_flash :danger, "Uh oh, we couldn't save the changes to your apartment. Please try again."
+    redirect_to("/users/#{session[:user_id]}")
+  end
+  
+  def take_off_market
+    if session[:user_id] == nil
+      add_flash :danger, "You must be signed in."
+      redirect_to("/sign_in")
+      return
+    end
+    
+    the_user = User.where({ :id => session[:user_id] }).first
+    
+    the_user_status = UserStatus.where({ :user_id => the_user.id, :year => 2019 })
+    
+    if the_user_status.count == 0
+      us = UserStatus.new({
+        :user_id => the_user.id,
+        :year => 2019,
+        :found_sublettor => true
+        })
+      if us.save
+        add_flash :success, "Congratulations on finding a sublettor for your apartment!"
+        redirect_to("/")
+        return
+      else
+        us.destroy
+        add_flash :danger, "Hmm... something went wrong. Try that again."
+        redirect_to("/users/#{session[:user_id]}")
+        return
+      end
+      
+    end
+    
   end
   
   def display_json(the_apartment)

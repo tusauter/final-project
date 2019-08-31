@@ -93,12 +93,27 @@
           </div>
         </div>
       </div>
+      <!-- price -->
+      <div class="form-row">
+        <div class="col">
+          <div class="form-group">
+            <label for="browser_price">Monthly Rent</label>
+            <input class="form-control" type="number" id="browser_price" name="qs_price" placeholder="Price">
+          </div>
+        </div>
+      </div>
       <button type="submit">Add my apartment</button>
     </form>
   </div>
 <% else %>
   <!-- signed in and the user and has apartment -->
   <h3 style="text-align: center;">You've got an apartment in the system!</h3>
+  <div class="container" style="margin: auto; display: flex; justify-content: center;">
+    <form action="/inactivate_apartment" style="margin: auto;">
+      <button type="submit" style="margin: auto;">Take my apartment off the market</button>
+    </form>
+  </div>
+  <h5 style="text-align: center; margin: auto;">Or...</h5>
   <div class="container">
     <form action="/update_apartment" method="post" style="max-width: 50%; margin: auto; background-color: #f0ebdf; border: thin solid gray;">
       <!-- address -->
@@ -155,7 +170,17 @@
           </div>
         </div>
       </div>
-      <button type="submit">Add my apartment</button>
+      <!-- price -->
+      <div class="form-row">
+        <div class="col">
+          <div class="form-group">
+            <label for="browser_price">Monthly Rent</label>
+            <% the_price = CurrentLocation.where({ :apartment_id => @user.current_apartment(2019).id, :year => 2019 }).first.price %>
+            <input class="form-control" type="number" id="browser_price" name="qs_price" value=<%= the_price %> placeholder="Price">
+          </div>
+        </div>
+      </div>
+      <button type="submit">Update my apartment</button>
     </form>
   </div>
 <% end %>
