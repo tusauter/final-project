@@ -41,6 +41,13 @@ class ApartmentsController < ApplicationController
   def show
     @is_signed_in = self.signed_in
     @the_apartment = Apartment.where({ :id => params[:apartment_id] })
+    if @the_apartment.count == 0
+      add_flash :warning, "Huh... we couldn't find this apartment. Maybe try again?"
+      redirect_to("/")
+      return
+    end
+    
+    @the_apartment = @the_apartment[0]
     
     users_with_sublettors = UserStatus.where({ :year => 2019, :found_sublettor => true }).pluck(:user_id)
     locations_this_year = CurrentLocation.where({ :year => 2019 }).where.not({ :user_id => users_with_sublettors }).pluck(:apartment_id)
@@ -49,14 +56,6 @@ class ApartmentsController < ApplicationController
       redirect_to("/")
       return
     end
-    
-    if @the_apartment.count == 0
-      add_flash :warning, "Huh... we couldn't find this apartment. Maybe try again?"
-      redirect_to("/")
-      return
-    end
-    
-    @the_apartment = @the_apartment[0]
     
     the_location = CurrentLocation.where({ :apartment_id => @the_apartment.id, :year => 2019 })
     
